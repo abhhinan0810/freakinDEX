@@ -247,7 +247,7 @@ export default function ClientProfile() {
 
           {reviews.length === 0 ? (
             <div className="bg-[#17171F] border border-[#2A2A35] rounded-2xl p-6 text-center text-xs text-[#92929E]">
-              No reviews logged for this client yet. Click &quot;Smashed Again&quot; to log your first review.
+              No reviews logged for this mf yet. Click &quot;Smashed Again&quot; to log your first review.
             </div>
           ) : (
             <div className="space-y-3">

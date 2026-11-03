@@ -123,8 +123,8 @@ export default function AddClient() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-white">Add New Client</h1>
-            <p className="text-xs text-[#92929E]">Register a profile in your private registry</p>
+            <h1 className="text-xl font-black text-white">Add New Dih</h1>
+            <p className="text-xs text-[#92929E]">Register a profile mf</p>
           </div>
         </div>
 
@@ -139,13 +139,13 @@ export default function AddClient() {
           {/* SECTION 1: PRIMARY PROFILE INFORMATION */}
           <div className="bg-[#17171F] border border-[#2A2A35] rounded-3xl p-5 space-y-4 shadow-xl">
             <h2 className="text-xs font-bold uppercase tracking-wider text-purple-400">
-              1. Profile Information
+              1.Who was it? 
             </h2>
 
             {/* Client Name */}
             <div>
               <label className="block text-xs font-semibold text-[#92929E] mb-1.5">
-                Client Name *
+                Name *
               </label>
               <input
                 type="text"
@@ -162,11 +162,10 @@ export default function AddClient() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-[#92929E] mb-1.5">
-                  Age (18+) *
+                  Age (18+) 
                 </label>
                 <input
                   type="number"
-                  required
                   min="18"
                   max="120"
                   value={age}
@@ -194,7 +193,7 @@ export default function AddClient() {
             {/* Avatar Selection */}
             <div>
               <label className="block text-xs font-semibold text-[#92929E] mb-1.5">
-                Select Client Avatar
+                Pick an Avatar
               </label>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
                 {DEFAULT_AVATARS.map((av) => (
@@ -225,7 +224,7 @@ export default function AddClient() {
           <div className="bg-[#17171F] border border-[#2A2A35] rounded-3xl p-5 space-y-4 shadow-xl">
             <div className="flex items-center justify-between">
               <h2 className="text-xs font-bold uppercase tracking-wider text-pink-400">
-                2. Initial Rating &amp; Review (Optional)
+                2. How Was It?
               </h2>
               <span className="text-[10px] text-[#92929E]">Can log later</span>
             </div>
@@ -261,7 +260,7 @@ export default function AddClient() {
             <div>
               <label className="block text-xs font-semibold text-[#92929E] mb-1.5 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-purple-400" />
-                <span>Encounter Date</span>
+                <span>Date</span>
               </label>
               <div className="relative">
                 <input
@@ -276,7 +275,7 @@ export default function AddClient() {
             {/* Written Review */}
             <div>
               <label className="block text-xs font-semibold text-[#92929E] mb-1.5">
-                Session Notes / Review
+                Had Fun?
               </label>
               <textarea
                 rows={3}
@@ -297,12 +296,12 @@ export default function AddClient() {
             {submitting ? (
               <>
                 <div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-                <span>Creating Client Profile...</span>
+                <span>Holeee Shittt...</span>
               </>
             ) : (
               <>
                 <Sparkles className="w-5 h-5 text-yellow-300" />
-                <span>SUBMIT &amp; SAVE CLIENT</span>
+                <span>FUCK IT!</span>
               </>
             )}
           </button>

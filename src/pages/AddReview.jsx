@@ -135,7 +135,7 @@ export default function AddReview() {
               <Flame className="w-5 h-5 text-pink-500 fill-current" />
               <span>Smashed Again</span>
             </h1>
-            <p className="text-xs text-[#92929E]">Log a new interaction session &amp; rating</p>
+            <p className="text-xs text-[#92929E]">How'd it go?</p>
           </div>
         </div>
 
@@ -178,7 +178,7 @@ export default function AddReview() {
             {/* 1. FIVE-STAR RATING SELECTOR */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-pink-400 mb-2">
-                1. Rate The Session (1 - 5 Stars) *
+                1. Rate dat thang (1 - 5 Stars) *
               </label>
               <div className="bg-[#0B0B0F] border border-[#2A2A35] rounded-2xl p-4 flex flex-col items-center justify-center gap-3">
                 <StarRating
@@ -199,7 +199,7 @@ export default function AddReview() {
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-[#92929E] mb-1.5 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-purple-400" />
-                <span>2. Session Date</span>
+                <span>2. Date</span>
               </label>
               <input
                 type="date"
@@ -215,7 +215,7 @@ export default function AddReview() {
             {/* 3. REVIEW TEXT */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-[#92929E] mb-1.5">
-                3. Session Notes &amp; Feedback (Optional)
+                3. Feedback (Optional)
               </label>
               <textarea
                 rows={4}
@@ -236,12 +236,12 @@ export default function AddReview() {
             {submitting ? (
               <>
                 <div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-                <span>Recording Session &amp; Updating Rating...</span>
+                <span>Ghatt Dayumm...</span>
               </>
             ) : (
               <>
                 <Flame className="w-5 h-5 fill-current text-amber-300" />
-                <span>SUBMIT REVIEW</span>
+                <span>SUCK IT!</span>
               </>
             )}
           </button>

@@ -99,7 +99,7 @@ export default function Dashboard() {
           </div>
 
           <p className="text-xs text-[#92929E] font-medium mt-1">
-            Total active client profiles secured in your vault
+            Dihs conqured
           </p>
         </section>
 
@@ -185,7 +185,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between px-1">
             <h2 className="text-sm font-bold uppercase tracking-wider text-[#92929E] flex items-center gap-2">
               <Users className="w-4 h-4 text-purple-400" />
-              <span>Client Directory ({processedClients.length})</span>
+              <span> THE LIST ({processedClients.length})</span>
             </h2>
 
             <button
@@ -225,7 +225,7 @@ export default function Dashboard() {
                   className="mt-2 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/30 hover:shadow-pink-600/40 active:scale-95 transition-all"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Add First Client</span>
+                  <span>Add New Dih</span>
                 </button>
               )}
             </div>
