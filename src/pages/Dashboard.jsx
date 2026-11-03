@@ -114,7 +114,7 @@ export default function Dashboard() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search clients by name or location..."
+              placeholder="Search by name or location..."
               className="w-full bg-[#17171F] border border-[#2A2A35] focus:border-purple-500 focus:ring-1 focus:ring-purple-500 rounded-2xl pl-10 pr-10 py-3 text-sm text-white placeholder-gray-500 outline-none transition-all"
             />
             {searchTerm && (
@@ -212,12 +212,12 @@ export default function Dashboard() {
                 🍆
               </div>
               <h3 className="text-base font-bold text-white">
-                {searchTerm ? 'No clients match your search' : 'No Clients In Your Directory'}
+                {searchTerm ? 'Nobody match your search' : 'Apparenty u a virgin rn'}
               </h3>
               <p className="text-xs text-[#92929E] max-w-xs mx-auto">
                 {searchTerm
-                  ? `No profiles found matching "${searchTerm}". Try a different keyword.`
-                  : 'Start tracking your private client profiles and recording interactions.'}
+                  ? `Nobody found matching "${searchTerm}". Try a different keyword.`
+                  : 'Start tracking.'}
               </p>
               {!searchTerm && (
                 <button
