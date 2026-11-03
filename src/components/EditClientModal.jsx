@@ -1,37 +1,17 @@
 import React, { useState } from 'react';
-import { X, Upload, Check } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import { DEFAULT_AVATARS } from '../utils/avatars';
-import { validateClientForm, validateMediaFile } from '../utils/validation';
-import { storageService } from '../services/storageService';
-import { useAuth } from '../context/AuthContext';
+import { validateClientForm } from '../utils/validation';
 
 export default function EditClientModal({ isOpen, client, onClose, onSave }) {
-  const { currentUser } = useAuth();
   const [name, setName] = useState(client?.name || '');
   const [age, setAge] = useState(client?.age || '');
   const [place, setPlace] = useState(client?.place || '');
   const [avatarId, setAvatarId] = useState(client?.avatarId || 'fire');
-  const [profileFile, setProfileFile] = useState(null);
-  const [profilePreview, setProfilePreview] = useState(client?.profileImageUrl || null);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
   if (!isOpen || !client) return null;
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const validation = validateMediaFile(file);
-    if (!validation.isValid) {
-      setErrors(prev => ({ ...prev, profileFile: validation.error }));
-      return;
-    }
-
-    setProfileFile(file);
-    setProfilePreview(URL.createObjectURL(file));
-    setErrors(prev => ({ ...prev, profileFile: null }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,28 +23,11 @@ export default function EditClientModal({ isOpen, client, onClose, onSave }) {
 
     setSubmitting(true);
     try {
-      let profileImageUrl = client.profileImageUrl;
-      let profileImagePath = client.profileImagePath;
-
-      if (profileFile && currentUser) {
-        const uploadRes = await storageService.uploadProfilePicture(
-          currentUser.uid,
-          client.clientId,
-          profileFile
-        );
-        if (uploadRes) {
-          profileImageUrl = uploadRes.downloadUrl;
-          profileImagePath = uploadRes.storagePath;
-        }
-      }
-
       await onSave({
         name: name.trim(),
         age: Number(age),
         place: place.trim(),
         avatarId,
-        profileImageUrl,
-        profileImagePath,
       });
       onClose();
     } catch (err) {
@@ -148,53 +111,25 @@ export default function EditClientModal({ isOpen, client, onClose, onSave }) {
             </div>
           </div>
 
-          {/* Profile Picture Upload */}
-          <div>
-            <label className="block text-xs font-semibold text-[#92929E] mb-1.5">
-              Update Profile Picture
-            </label>
-            <div className="flex items-center gap-3">
-              {profilePreview && (
-                <img
-                  src={profilePreview}
-                  alt="Preview"
-                  className="w-12 h-12 rounded-full object-cover border border-purple-500/40"
-                />
-              )}
-              <label className="flex-1 cursor-pointer flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-[#20202A] border border-[#2A2A35] hover:border-purple-500/40 text-xs font-semibold text-gray-200 transition-colors">
-                <Upload className="w-4 h-4 text-purple-400" />
-                <span>Upload New Photo</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-              </label>
-            </div>
-            {errors.profileFile && (
-              <p className="text-rose-400 text-xs mt-1">{errors.profileFile}</p>
-            )}
-          </div>
-
           {/* Avatar selector */}
           <div>
             <label className="block text-xs font-semibold text-[#92929E] mb-1.5">
-              Or Choose Default Avatar
+              Choose Avatar
             </label>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
               {DEFAULT_AVATARS.map((av) => (
                 <button
                   type="button"
                   key={av.id}
                   onClick={() => setAvatarId(av.id)}
-                  className={`relative p-2 rounded-xl border flex flex-col items-center justify-center transition-all ${
+                  className={`relative p-2.5 rounded-xl border flex flex-col items-center justify-center transition-all ${
                     avatarId === av.id
                       ? 'border-purple-500 bg-purple-500/20 shadow-md shadow-purple-500/20'
                       : 'border-[#2A2A35] bg-[#20202A] hover:border-[#3a3a4a]'
                   }`}
                 >
-                  <span className="text-xl">{av.emoji}</span>
+                  <span className="text-2xl">{av.emoji}</span>
+                  <span className="text-[10px] text-[#92929E] mt-0.5">{av.label}</span>
                   {avatarId === av.id && (
                     <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-purple-500 flex items-center justify-center">
                       <Check className="w-2.5 h-2.5 text-white" />

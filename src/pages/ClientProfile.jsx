@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import StarRating from '../components/StarRating';
 import ReviewCard from '../components/ReviewCard';
-import MediaGallery from '../components/MediaGallery';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EditClientModal from '../components/EditClientModal';
 import { LoadingSpinner } from '../components/Loading';
@@ -18,10 +17,8 @@ import {
   Edit3,
   Trash2,
   MapPin,
-  Calendar,
   ChevronDown,
   ChevronUp,
-  Image as ImageIcon,
   MessageSquare,
   Plus
 } from 'lucide-react';
@@ -34,7 +31,6 @@ export default function ClientProfile() {
 
   const [client, setClient] = useState(null);
   const [reviews, setReviews] = useState([]);
-  const [mediaList, setMediaList] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Reviews expansion state (Show initial 2, then SHOW PAST REVIEWS)
@@ -61,9 +57,6 @@ export default function ClientProfile() {
 
       const clientReviews = await reviewService.getReviewsForClient(clientId);
       setReviews(clientReviews);
-
-      const clientMedia = await reviewService.getMediaForClient(clientId);
-      setMediaList(clientMedia);
     } catch (err) {
       console.error(err);
       error('Failed to load client profile.');
@@ -110,7 +103,6 @@ export default function ClientProfile() {
       await reviewService.deleteReview(deleteReviewId, clientId);
       success('Review deleted.');
       setDeleteReviewId(null);
-      // Reload updated reviews and rating
       await loadClientData();
     } catch (err) {
       error('Failed to delete review: ' + err.message);
@@ -135,8 +127,6 @@ export default function ClientProfile() {
   const avatarInfo = getAvatarById(client.avatarId);
   const ratingValue = client.averageRating || 0;
   const totalReviews = reviews.length;
-
-  // Determine reviews to show based on expansion
   const visibleReviews = expandedReviews ? reviews : reviews.slice(0, 2);
 
   return (
@@ -176,24 +166,10 @@ export default function ClientProfile() {
         <section className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#17171F] to-[#121218] border border-[#2A2A35] p-6 text-center shadow-2xl">
           <div className="absolute top-0 right-1/2 translate-x-1/2 -mt-12 w-48 h-48 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Large Profile Picture / Avatar */}
+          {/* Large Avatar */}
           <div className="relative inline-block mx-auto mb-4">
-            {client.profileImageUrl ? (
-              <img
-                src={client.profileImageUrl}
-                alt={client.name}
-                className="w-28 h-28 rounded-full object-cover border-4 border-purple-500/40 shadow-xl shadow-purple-500/20"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
-                }}
-              />
-            ) : null}
-
             <div
-              className={`w-28 h-28 rounded-full bg-gradient-to-tr ${avatarInfo.gradient} flex items-center justify-center text-5xl border-4 border-purple-500/40 shadow-xl shadow-purple-500/20 ${
-                client.profileImageUrl ? 'hidden' : 'flex'
-              }`}
+              className={`w-28 h-28 rounded-3xl bg-gradient-to-tr ${avatarInfo.gradient} flex items-center justify-center text-6xl border-4 border-purple-500/40 shadow-xl shadow-purple-500/20`}
             >
               <span>{avatarInfo.emoji}</span>
             </div>
@@ -305,18 +281,6 @@ export default function ClientProfile() {
             </div>
           )}
         </section>
-
-        {/* MEDIA GALLERY SECTION */}
-        <section className="space-y-3 pt-2">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-[#92929E] flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-pink-400" />
-              <span>Vault Media Gallery ({mediaList.length})</span>
-            </h2>
-          </div>
-
-          <MediaGallery mediaList={mediaList} />
-        </section>
       </main>
 
       {/* Edit Client Modal */}
@@ -331,7 +295,7 @@ export default function ClientProfile() {
       <ConfirmDialog
         isOpen={isDeleteClientOpen}
         title={`Delete ${client.name}?`}
-        message="This will permanently delete this client profile along with all associated reviews and private media files from storage."
+        message="This will permanently delete this client profile along with all associated reviews from your vault."
         confirmText="Yes, Delete Client"
         cancelText="Keep Client"
         isDestructive={true}

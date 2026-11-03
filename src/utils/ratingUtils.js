@@ -46,3 +46,4 @@ export function formatRating(rating, totalReviews = 1) {
   const num = Number(rating);
   return `${num.toFixed(1)}/5`;
 }
+

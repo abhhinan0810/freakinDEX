@@ -8,16 +8,12 @@ import { useToast } from '../context/ToastContext';
 import { clientService } from '../services/clientService';
 import { reviewService } from '../services/reviewService';
 import { getAvatarById } from '../utils/avatars';
-import { validateReviewForm, validateMediaFile } from '../utils/validation';
+import { validateReviewForm } from '../utils/validation';
 import confetti from 'canvas-confetti';
 import {
   ArrowLeft,
   Flame,
   Calendar,
-  Upload,
-  Film,
-  X,
-  Sparkles,
   AlertCircle
 } from 'lucide-react';
 
@@ -34,7 +30,6 @@ export default function AddReview() {
   const [rating, setRating] = useState(5);
   const [reviewDate, setReviewDate] = useState(new Date().toISOString().split('T')[0]);
   const [reviewText, setReviewText] = useState('');
-  const [mediaFiles, setMediaFiles] = useState([]); // [{ file, preview, isVideo }]
 
   // Submission state
   const [submitting, setSubmitting] = useState(false);
@@ -62,38 +57,6 @@ export default function AddReview() {
     fetchClient();
   }, [clientId, navigate, error]);
 
-  const handleMediaUpload = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    const newMedia = [];
-    let err = null;
-
-    for (const f of files) {
-      const v = validateMediaFile(f);
-      if (!v.isValid) {
-        err = v.error;
-        break;
-      }
-      newMedia.push({
-        file: f,
-        preview: URL.createObjectURL(f),
-        isVideo: v.fileType === 'video'
-      });
-    }
-
-    if (err) {
-      setErrors(prev => ({ ...prev, media: err }));
-    } else {
-      setMediaFiles(prev => [...prev, ...newMedia]);
-      setErrors(prev => ({ ...prev, media: null }));
-    }
-  };
-
-  const removeMedia = (index) => {
-    setMediaFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
@@ -112,7 +75,6 @@ export default function AddReview() {
           rating,
           reviewText,
           reviewDate: reviewDate || new Date().toISOString().split('T')[0],
-          mediaFiles,
         },
         currentUser?.uid
       );
@@ -180,19 +142,11 @@ export default function AddReview() {
         {/* CLIENT SUMMARY HEADER */}
         <div className="bg-[#17171F] border border-[#2A2A35] rounded-3xl p-4 flex items-center gap-4 shadow-xl">
           <div className="shrink-0">
-            {client.profileImageUrl ? (
-              <img
-                src={client.profileImageUrl}
-                alt={client.name}
-                className="w-14 h-14 rounded-full object-cover border-2 border-purple-500/50 shadow-md"
-              />
-            ) : (
-              <div
-                className={`w-14 h-14 rounded-full bg-gradient-to-tr ${avatarInfo.gradient} flex items-center justify-center text-2xl border-2 border-purple-500/50`}
-              >
-                <span>{avatarInfo.emoji}</span>
-              </div>
-            )}
+            <div
+              className={`w-14 h-14 rounded-2xl bg-gradient-to-tr ${avatarInfo.gradient} flex items-center justify-center text-3xl border border-white/10 shadow-md`}
+            >
+              <span>{avatarInfo.emoji}</span>
+            </div>
           </div>
 
           <div className="flex-1 min-w-0">
@@ -271,66 +225,9 @@ export default function AddReview() {
                 className="w-full bg-[#0B0B0F] border border-[#2A2A35] focus:border-purple-500 rounded-xl p-3.5 text-sm text-white placeholder-gray-500 outline-none resize-none"
               />
             </div>
-
-            {/* 4 & 5. PHOTO & VIDEO UPLOADS */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#92929E] mb-1.5">
-                4. Upload Photos &amp; Videos (Optional)
-              </label>
-              <label className="cursor-pointer border-2 border-dashed border-[#2A2A35] hover:border-pink-500/50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 bg-[#0B0B0F] transition-colors">
-                <Upload className="w-6 h-6 text-pink-400" />
-                <span className="text-xs font-bold text-gray-200">
-                  Select Photos or Videos
-                </span>
-                <span className="text-[10px] text-[#92929E]">
-                  JPG, PNG, WEBP, MP4, MOV (Secured in private vault)
-                </span>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*,video/*"
-                  onChange={handleMediaUpload}
-                  className="hidden"
-                />
-              </label>
-              {errors.media && (
-                <p className="text-rose-400 text-xs mt-1">{errors.media}</p>
-              )}
-
-              {/* Thumbnails of selected media */}
-              {mediaFiles.length > 0 && (
-                <div className="mt-3 grid grid-cols-4 gap-2.5">
-                  {mediaFiles.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="relative aspect-square rounded-xl overflow-hidden bg-[#20202A] border border-[#2A2A35]"
-                    >
-                      {item.isVideo ? (
-                        <div className="w-full h-full flex items-center justify-center bg-black/60">
-                          <Film className="w-5 h-5 text-pink-400" />
-                        </div>
-                      ) : (
-                        <img
-                          src={item.preview}
-                          alt="upload thumbnail"
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeMedia(idx)}
-                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600/90 text-white flex items-center justify-center"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
 
-          {/* 6. SUBMIT REVIEW BUTTON */}
+          {/* SUBMIT REVIEW BUTTON */}
           <button
             type="submit"
             disabled={submitting}

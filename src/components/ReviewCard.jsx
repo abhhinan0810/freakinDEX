@@ -1,8 +1,8 @@
 import React from 'react';
 import StarRating from './StarRating';
-import { Calendar, Play, Trash2 } from 'lucide-react';
+import { Calendar, Trash2 } from 'lucide-react';
 
-export default function ReviewCard({ review, onDelete, onMediaClick }) {
+export default function ReviewCard({ review, onDelete }) {
   const formattedDate = review.reviewDate
     ? new Date(review.reviewDate).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -18,7 +18,7 @@ export default function ReviewCard({ review, onDelete, onMediaClick }) {
     : 'Unknown Date';
 
   return (
-    <div className="bg-[#17171F] border border-[#2A2A35] rounded-2xl p-4 transition-all hover:border-[#3a3a4a] space-y-3">
+    <div className="bg-[#17171F] border border-[#2A2A35] rounded-2xl p-4 transition-all hover:border-[#3a3a4a] space-y-2.5">
       {/* Header: Rating & Date */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -50,43 +50,6 @@ export default function ReviewCard({ review, onDelete, onMediaClick }) {
         <p className="text-sm text-gray-200 leading-relaxed break-words whitespace-pre-wrap">
           {review.reviewText}
         </p>
-      )}
-
-      {/* Associated Media Thumbnails */}
-      {review.media && review.media.length > 0 && (
-        <div className="pt-1 flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
-          {review.media.map((med, idx) => {
-            const isVideo = med.fileType === 'video' || med.fileName?.endsWith('.mp4');
-
-            return (
-              <div
-                key={med.mediaId || idx}
-                onClick={() => onMediaClick && onMediaClick(med)}
-                className="relative w-16 h-16 rounded-xl overflow-hidden bg-[#20202A] border border-[#2A2A35] shrink-0 cursor-pointer group hover:border-purple-500/50"
-              >
-                {isVideo ? (
-                  <div className="w-full h-full flex items-center justify-center bg-black/40">
-                    <video
-                      src={med.downloadUrl}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all">
-                      <div className="w-6 h-6 rounded-full bg-purple-600/90 flex items-center justify-center text-white">
-                        <Play className="w-3 h-3 fill-current ml-0.5" />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <img
-                    src={med.downloadUrl}
-                    alt={med.fileName || 'Review attachment'}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
       )}
     </div>
   );

@@ -14,3 +14,4 @@ export const DEFAULT_AVATARS = [
 export function getAvatarById(id) {
   return DEFAULT_AVATARS.find(a => a.id === id) || DEFAULT_AVATARS[0];
 }
+

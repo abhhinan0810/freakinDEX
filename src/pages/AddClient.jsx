@@ -6,16 +6,11 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { clientService } from '../services/clientService';
 import { reviewService } from '../services/reviewService';
-import { storageService } from '../services/storageService';
 import { DEFAULT_AVATARS } from '../utils/avatars';
-import { validateClientForm, validateMediaFile } from '../utils/validation';
+import { validateClientForm } from '../utils/validation';
 import confetti from 'canvas-confetti';
 import {
   ArrowLeft,
-  Upload,
-  Camera,
-  Film,
-  X,
   Check,
   Calendar,
   Sparkles,
@@ -33,68 +28,14 @@ export default function AddClient() {
   const [place, setPlace] = useState('');
   const [avatarId, setAvatarId] = useState('fire');
 
-  // Profile Picture File
-  const [profileFile, setProfileFile] = useState(null);
-  const [profilePreview, setProfilePreview] = useState(null);
-
   // Initial Review (Optional)
   const [initialRating, setInitialRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const [reviewDate, setReviewDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // Media files (photos/videos) for initial review
-  const [mediaFiles, setMediaFiles] = useState([]); // [{ file, preview, isVideo }]
-
   // Submission state
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
-
-  const handleProfileFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const validation = validateMediaFile(file);
-    if (!validation.isValid) {
-      setErrors(prev => ({ ...prev, profile: validation.error }));
-      return;
-    }
-
-    setProfileFile(file);
-    setProfilePreview(URL.createObjectURL(file));
-    setErrors(prev => ({ ...prev, profile: null }));
-  };
-
-  const handleMediaUpload = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    const newMedia = [];
-    let err = null;
-
-    for (const f of files) {
-      const v = validateMediaFile(f);
-      if (!v.isValid) {
-        err = v.error;
-        break;
-      }
-      newMedia.push({
-        file: f,
-        preview: URL.createObjectURL(f),
-        isVideo: v.fileType === 'video'
-      });
-    }
-
-    if (err) {
-      setErrors(prev => ({ ...prev, media: err }));
-    } else {
-      setMediaFiles(prev => [...prev, ...newMedia]);
-      setErrors(prev => ({ ...prev, media: null }));
-    }
-  };
-
-  const removeMedia = (index) => {
-    setMediaFiles(prev => prev.filter((_, i) => i !== index));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -111,34 +52,13 @@ export default function AddClient() {
     let createdClientId = null;
 
     try {
-      // 2. Upload profile picture if provided
-      let profileImageUrl = null;
-      let profileImagePath = null;
-
-      // Temporary ID for path structuring
-      const tempClientId = `client_${Date.now()}`;
-
-      if (profileFile && currentUser) {
-        const uploadRes = await storageService.uploadProfilePicture(
-          currentUser.uid,
-          tempClientId,
-          profileFile
-        );
-        if (uploadRes) {
-          profileImageUrl = uploadRes.downloadUrl;
-          profileImagePath = uploadRes.storagePath;
-        }
-      }
-
-      // 3. Create client record
+      // 2. Create client record
       const clientDoc = await clientService.createClient(
         {
           name,
           age,
           place,
           avatarId,
-          profileImageUrl,
-          profileImagePath,
           initialRating: initialRating > 0 ? initialRating : 0,
         },
         currentUser.uid
@@ -146,21 +66,20 @@ export default function AddClient() {
 
       createdClientId = clientDoc.clientId || clientDoc.id;
 
-      // 4. If initial rating/review or media provided, create review
-      if (initialRating > 0 || reviewText.trim() || mediaFiles.length > 0) {
+      // 3. If initial rating/review provided, create review
+      if (initialRating > 0 || reviewText.trim()) {
         await reviewService.createReview(
           {
             clientId: createdClientId,
             rating: initialRating > 0 ? initialRating : 5,
             reviewText,
             reviewDate,
-            mediaFiles,
           },
           currentUser.uid
         );
       }
 
-      // 5. Celebration & redirect
+      // 4. Confetti & redirect
       try {
         confetti({
           particleCount: 50,
@@ -176,7 +95,6 @@ export default function AddClient() {
       navigate('/');
     } catch (err) {
       console.error('Submission failed:', err);
-      // Clean up in case of catastrophic failure
       if (createdClientId) {
         try {
           await clientService.deleteClient(createdClientId, currentUser?.uid);
@@ -273,69 +191,27 @@ export default function AddClient() {
               </div>
             </div>
 
-            {/* Profile Picture Upload */}
+            {/* Avatar Selection */}
             <div>
               <label className="block text-xs font-semibold text-[#92929E] mb-1.5">
-                Profile Picture (Optional)
+                Select Client Avatar
               </label>
-              <div className="flex items-center gap-3">
-                {profilePreview ? (
-                  <div className="relative">
-                    <img
-                      src={profilePreview}
-                      alt="Profile preview"
-                      className="w-14 h-14 rounded-full object-cover border-2 border-purple-500 shadow-md"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setProfileFile(null);
-                        setProfilePreview(null);
-                      }}
-                      className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ) : null}
-
-                <label className="flex-1 cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#20202A] border border-[#2A2A35] hover:border-purple-500/50 text-xs font-semibold text-gray-200 transition-colors">
-                  <Camera className="w-4 h-4 text-purple-400" />
-                  <span>{profilePreview ? 'Change Photo' : 'Upload Profile Picture'}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleProfileFileChange}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-              {errors.profile && (
-                <p className="text-rose-400 text-xs mt-1">{errors.profile}</p>
-              )}
-            </div>
-
-            {/* Default Avatar Selection */}
-            <div>
-              <label className="block text-xs font-semibold text-[#92929E] mb-1.5">
-                Or Select Default Avatar
-              </label>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
                 {DEFAULT_AVATARS.map((av) => (
                   <button
                     type="button"
                     key={av.id}
                     onClick={() => setAvatarId(av.id)}
-                    className={`relative p-2.5 rounded-xl border flex flex-col items-center justify-center transition-all ${
+                    className={`relative p-3 rounded-2xl border flex flex-col items-center justify-center transition-all ${
                       avatarId === av.id
-                        ? 'border-purple-500 bg-purple-500/20 shadow-md shadow-purple-500/20'
+                        ? 'border-purple-500 bg-purple-500/20 shadow-lg shadow-purple-500/20 scale-105'
                         : 'border-[#2A2A35] bg-[#20202A] hover:border-[#3a3a4a]'
                     }`}
                   >
-                    <span className="text-2xl">{av.emoji}</span>
-                    <span className="text-[10px] text-[#92929E] mt-0.5">{av.label}</span>
+                    <span className="text-3xl">{av.emoji}</span>
+                    <span className="text-[11px] text-[#92929E] mt-1 font-medium">{av.label}</span>
                     {avatarId === av.id && (
-                      <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-purple-500 flex items-center justify-center">
+                      <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center">
                         <Check className="w-2.5 h-2.5 text-white" />
                       </span>
                     )}
@@ -383,8 +259,9 @@ export default function AddClient() {
 
             {/* Review Date */}
             <div>
-              <label className="block text-xs font-semibold text-[#92929E] mb-1.5">
-                Encounter Date
+              <label className="block text-xs font-semibold text-[#92929E] mb-1.5 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-purple-400" />
+                <span>Encounter Date</span>
               </label>
               <div className="relative">
                 <input
@@ -408,63 +285,6 @@ export default function AddClient() {
                 placeholder="Log details, chemistry, memorable moments..."
                 className="w-full bg-[#0B0B0F] border border-[#2A2A35] focus:border-purple-500 rounded-xl p-3 text-sm text-white placeholder-gray-500 outline-none resize-none"
               />
-            </div>
-
-            {/* Photos & Videos Upload */}
-            <div>
-              <label className="block text-xs font-semibold text-[#92929E] mb-1.5">
-                Attach Private Photos &amp; Videos
-              </label>
-              <label className="cursor-pointer border-2 border-dashed border-[#2A2A35] hover:border-purple-500/50 rounded-2xl p-4 flex flex-col items-center justify-center gap-1.5 bg-[#0B0B0F] transition-colors">
-                <Upload className="w-5 h-5 text-purple-400" />
-                <span className="text-xs font-semibold text-gray-200">
-                  Select Photos or Videos
-                </span>
-                <span className="text-[10px] text-[#92929E]">
-                  JPG, PNG, WEBP, MP4, MOV (Max 15MB img / 100MB vid)
-                </span>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*,video/*"
-                  onChange={handleMediaUpload}
-                  className="hidden"
-                />
-              </label>
-              {errors.media && (
-                <p className="text-rose-400 text-xs mt-1">{errors.media}</p>
-              )}
-
-              {/* Selected Media Previews */}
-              {mediaFiles.length > 0 && (
-                <div className="mt-3 grid grid-cols-4 gap-2">
-                  {mediaFiles.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="relative aspect-square rounded-xl overflow-hidden bg-[#20202A] border border-[#2A2A35]"
-                    >
-                      {item.isVideo ? (
-                        <div className="w-full h-full flex items-center justify-center bg-black/60">
-                          <Film className="w-5 h-5 text-pink-400" />
-                        </div>
-                      ) : (
-                        <img
-                          src={item.preview}
-                          alt="upload thumbnail"
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeMedia(idx)}
-                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600/90 text-white flex items-center justify-center"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 

@@ -8,12 +8,10 @@ import {
   deleteDoc,
   query,
   where,
-  orderBy,
   runTransaction,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './firebase';
-import { storageService } from './storageService';
 
 const LOCAL_CLIENTS_KEY = 'freakindex_clients_store';
 
@@ -25,8 +23,6 @@ const INITIAL_DEMO_CLIENTS = [
     age: 23,
     place: 'Downtown Loft',
     avatarId: 'fire',
-    profileImagePath: null,
-    profileImageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
     averageRating: 4.8,
     totalReviews: 4,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12).toISOString(),
@@ -39,8 +35,6 @@ const INITIAL_DEMO_CLIENTS = [
     age: 26,
     place: 'Midtown Rooftop',
     avatarId: 'cherries',
-    profileImagePath: null,
-    profileImageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
     averageRating: 4.5,
     totalReviews: 2,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 20).toISOString(),
@@ -53,8 +47,6 @@ const INITIAL_DEMO_CLIENTS = [
     age: 21,
     place: 'Westside Penthouse',
     avatarId: 'lips',
-    profileImagePath: null,
-    profileImageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80',
     averageRating: 5.0,
     totalReviews: 3,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 35).toISOString(),
@@ -95,7 +87,6 @@ export const clientService = {
         id: d.id,
         ...d.data()
       }));
-      // Sort in memory by createdAt descending
       return clients.sort((a, b) => {
         const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt || 0).getTime();
         const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt || 0).getTime();
@@ -132,8 +123,6 @@ export const clientService = {
       age: Number(clientData.age),
       place: clientData.place ? clientData.place.trim() : '',
       avatarId: clientData.avatarId || 'fire',
-      profileImagePath: clientData.profileImagePath || null,
-      profileImageUrl: clientData.profileImageUrl || null,
       averageRating: clientData.initialRating ? Number(clientData.initialRating) : 0,
       totalReviews: clientData.initialRating ? 1 : 0,
       createdAt: isFirebaseConfigured ? serverTimestamp() : new Date().toISOString(),
@@ -186,7 +175,7 @@ export const clientService = {
   },
 
   /**
-   * Delete client and cascade delete related reviews & media
+   * Delete client and cascade delete related reviews
    */
   async deleteClient(clientId, userId) {
     if (isFirebaseConfigured && db) {
@@ -197,27 +186,9 @@ export const clientService = {
         await deleteDoc(reviewDoc.ref);
       }
 
-      // 2. Delete associated media records & storage files
-      const mediaQ = query(collection(db, 'media'), where('clientId', '==', clientId));
-      const mediaSnap = await getDocs(mediaQ);
-      for (const mDoc of mediaSnap.docs) {
-        const data = mDoc.data();
-        if (data.storagePath) {
-          await storageService.deleteFile(data.storagePath);
-        }
-        await deleteDoc(mDoc.ref);
-      }
-
-      // 3. Delete client document
+      // 2. Delete client document
       const clientRef = doc(db, 'clients', clientId);
-      const clientSnap = await getDoc(clientRef);
-      if (clientSnap.exists()) {
-        const clientData = clientSnap.data();
-        if (clientData.profileImagePath) {
-          await storageService.deleteFile(clientData.profileImagePath);
-        }
-        await deleteDoc(clientRef);
-      }
+      await deleteDoc(clientRef);
       return true;
     } else {
       // Local fallback mode cascade deletion
@@ -236,18 +207,6 @@ export const clientService = {
           console.warn('Error cleaning local reviews:', e);
         }
       }
-
-      // Clean local media
-      const mediaKey = 'freakindex_media_store';
-      const storedMedia = localStorage.getItem(mediaKey);
-      if (storedMedia) {
-        try {
-          const m = JSON.parse(storedMedia).filter(item => item.clientId !== clientId);
-          localStorage.setItem(mediaKey, JSON.stringify(m));
-        } catch (e) {
-          console.warn('Error cleaning local media:', e);
-        }
-      }
       return true;
     }
   },
@@ -257,7 +216,6 @@ export const clientService = {
    */
   async recalculateClientRating(clientId) {
     if (isFirebaseConfigured && db) {
-      // Query all reviews for this client
       const reviewsQ = query(collection(db, 'reviews'), where('clientId', '==', clientId));
       const reviewsSnap = await getDocs(reviewsQ);
 
@@ -272,7 +230,6 @@ export const clientService = {
         averageRating = Math.round((sum / totalReviews) * 10) / 10;
       }
 
-      // Transaction to safely update client aggregate
       const clientRef = doc(db, 'clients', clientId);
       await runTransaction(db, async (transaction) => {
         const clientDoc = await transaction.get(clientRef);
@@ -288,7 +245,6 @@ export const clientService = {
 
       return { averageRating, totalReviews };
     } else {
-      // Local recalculation
       const reviewsKey = 'freakindex_reviews_store';
       const storedReviews = localStorage.getItem(reviewsKey);
       let reviews = [];

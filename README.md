@@ -1,6 +1,9 @@
 # freakinDEX 🍆💦
 
-A private, secure, mobile-first client profile and interaction tracking application featuring client management, dynamic average ratings, review history, private media galleries (photos and videos), and authenticated cloud storage.
+A private, secure, mobile-first client directory and interaction tracking application featuring client management, dynamic average ratings, chronological review history, and secure Cloud Firestore storage.
+
+> **100% Free Plan (No Credit Card / No Blaze Required)**  
+> This version operates entirely on **Firebase Authentication** and **Cloud Firestore Database**, which are 100% free forever on Firebase's Spark Plan. You never need to enter a credit card or upgrade to the Blaze plan.
 
 ---
 
@@ -9,10 +12,10 @@ A private, secure, mobile-first client profile and interaction tracking applicat
 - **Mobile-First UX & Dark Theme**: Designed specifically for fluid mobile gestures and dark aesthetics (`#0B0B0F` base, `#17171F` card backgrounds, purple/pink neon accents, gold star ratings).
 - **Body Count Hero Metric**: Prominent live counter tracking total client profiles secured in your vault.
 - **Dynamic Star Ratings**: Reliable 5-star scoring system recalculating cumulative averages dynamically on every session.
-- **Smashed Again Quick-Log**: Instant dedicated interaction logging page with star selector, session notes, date picker, and media attachments.
+- **Smashed Again Quick-Log**: Instant dedicated interaction logging page with star selector, session notes, and date picker.
 - **Review History & Expansion**: Complete chronological history of reviews with collapsible older sessions.
-- **Private Media Vault**: High-speed photo and video gallery with full playback and image preview modals.
-- **Strict Access Control**: Route guards, disabled public registrations, and authenticated storage permissions.
+- **Edgy Avatar Profiles**: High-style customizable gradient avatars (🔥, 🍒, 😈, 💋, 💎, 🐆, 🐰, ✨, 🍑) for private client identity.
+- **Strict Access Control**: Route guards, disabled public registrations, and authenticated Firestore permissions.
 - **Zero-Config Preview Sandbox**: Operates right out of the box with preloaded sample data even before connecting your Firebase project.
 
 ---
@@ -23,9 +26,8 @@ A private, secure, mobile-first client profile and interaction tracking applicat
 - **Styling**: Tailwind CSS
 - **Icons**: Lucide React
 - **Animations**: Canvas Confetti & CSS Shimmer transitions
-- **Authentication**: Firebase Authentication
-- **Database**: Cloud Firestore
-- **Media Storage**: Firebase Cloud Storage
+- **Authentication**: Firebase Authentication (Free Spark Plan)
+- **Database**: Cloud Firestore (Free Spark Plan)
 - **Deployment**: Vercel (`vercel.json` SPA rewrite configured)
 
 ---
@@ -47,27 +49,19 @@ When started without a `.env` file, **freakinDEX** runs in **Local Preview Mode*
 
 ---
 
-## 🔒 Connecting Your Firebase Project (Step-by-Step)
-
-Follow these steps to connect your own live Firebase backend:
+## 🔒 Connecting Your Firebase Project (100% Free — No Card Needed)
 
 ### Step 1: Create a Firebase Project
 1. Go to the [Firebase Console](https://console.firebase.google.com/).
 2. Click **Add project** (or **Create a project**).
-3. Name your project (e.g. `freakindex-vault`) and follow the prompt (Google Analytics is optional).
+3. Name your project (e.g. `freakindex-vault`) and follow the prompt.
 4. Click **Create project**.
 
 ### Step 2: Register Web App & Get Credentials
 1. In your project overview, click the **Web icon `</>`** to add an app.
-2. Enter an app nickname (e.g., `freakinDEX Web`).
+2. Enter an app nickname (e.g. `freakinDEX Web`).
 3. Click **Register app**.
-4. Firebase will show your `firebaseConfig` keys:
-   - `apiKey`
-   - `authDomain`
-   - `projectId`
-   - `storageBucket`
-   - `messagingSenderId`
-   - `appId`
+4. Copy the keys shown in `firebaseConfig`.
 
 ### Step 3: Configure Environment Variables
 Copy `.env.example` to `.env`:
@@ -79,7 +73,6 @@ Fill in the values from your Firebase console:
 VITE_FIREBASE_API_KEY=AIzaSy...
 VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your-project
-VITE_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
 VITE_FIREBASE_MESSAGING_SENDER_ID=1234567890
 VITE_FIREBASE_APP_ID=1:1234567890:web:...
 ```
@@ -88,30 +81,22 @@ VITE_FIREBASE_APP_ID=1:1234567890:web:...
 1. In Firebase Console, go to **Build > Authentication**.
 2. Click **Get Started**.
 3. Under the **Sign-in method** tab, select **Email/Password**.
-4. Enable **Email/Password** and click **Save**.
-5. *Security Recommendation*: Keep **Email link (passwordless sign-in)** disabled. Since public registration is disabled in freakinDEX, only administrators created via console or authorized scripts can sign in.
+4. Turn on the **Email/Password** toggle and click **Save**.
 
-### Step 5: Create Your First Administrator Account
+### Step 5: Create Your Administrator Account
 1. Under **Authentication > Users** tab, click **Add user**.
-2. Enter your desired administrator email (e.g. `admin@yourdomain.com`) and a strong password.
+2. Enter your desired administrator email (e.g. `admin@yourdomain.com`) and password.
 3. Click **Add user**.
 
 ### Step 6: Create Cloud Firestore Database
 1. In Firebase Console, navigate to **Build > Firestore Database**.
 2. Click **Create database**.
-3. Choose your database location (select one close to your region).
-4. Start in **Production mode** (rules will be applied in Step 8).
+3. Choose your database location.
+4. Start in **Production mode**.
 
-### Step 7: Enable Firebase Cloud Storage
-1. Navigate to **Build > Storage**.
-2. Click **Get Started**.
-3. Select **Start in production mode**.
-4. Choose the storage location and click **Done**.
+### Step 7: Deploy Firestore Security Rules
+Go to **Firestore Database > Rules** tab, paste the rules below, and click **Publish**:
 
-### Step 8: Deploy Firebase Security Rules
-Deploy using the Firebase CLI or copy-paste directly into the Firebase Console:
-
-#### Firestore Rules (`firestore.rules`):
 ```text
 rules_version = '2';
 service cloud.firestore {
@@ -139,33 +124,6 @@ service cloud.firestore {
       allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
       allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
     }
-
-    match /media/{mediaId} {
-      allow read: if isAuthenticated() && (resource.data.uploadedBy == request.auth.uid);
-      allow create: if isAuthenticated() && request.resource.data.uploadedBy == request.auth.uid;
-      allow update: if isAuthenticated() && resource.data.uploadedBy == request.auth.uid;
-      allow delete: if isAuthenticated() && resource.data.uploadedBy == request.auth.uid;
-    }
-  }
-}
-```
-
-#### Storage Rules (`storage.rules`):
-```text
-rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /private/users/{userId}/clients/{clientId}/{allPaths=**} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null 
-                   && request.auth.uid == userId
-                   && (
-                     (request.resource.contentType.matches('image/.*') && request.resource.size < 15 * 1024 * 1024)
-                     ||
-                     (request.resource.contentType.matches('video/.*') && request.resource.size < 100 * 1024 * 1024)
-                   );
-      allow delete: if request.auth != null && request.auth.uid == userId;
-    }
   }
 }
 ```
@@ -176,10 +134,8 @@ service firebase.storage {
 
 ### 1. Push to GitHub
 ```bash
-git init
 git add .
-git commit -m "feat: initial freakinDEX release"
-git branch -M main
+git commit -m "feat: streamline freakinDEX without storage requirement"
 git remote add origin https://github.com/your-username/freakinDEX.git
 git push -u origin main
 ```
@@ -187,78 +143,11 @@ git push -u origin main
 ### 2. Deploy to Vercel
 1. Log into your [Vercel Dashboard](https://vercel.com).
 2. Click **Add New... > Project** and select your GitHub repository.
-3. Framework Preset: **Vite** (auto-detected).
-4. Under **Environment Variables**, paste the keys from your `.env`:
+3. Under **Environment Variables**, paste the keys from your `.env`:
    - `VITE_FIREBASE_API_KEY`
    - `VITE_FIREBASE_AUTH_DOMAIN`
    - `VITE_FIREBASE_PROJECT_ID`
-   - `VITE_FIREBASE_STORAGE_BUCKET`
    - `VITE_FIREBASE_MESSAGING_SENDER_ID`
    - `VITE_FIREBASE_APP_ID`
-5. Click **Deploy**.
-6. The included `vercel.json` rewrite ensures that nested routes like `/client/:id` and `/client/:id/review` reload seamlessly without 404 errors.
-
----
-
-## 📂 Project Structure
-
-```
-freakinDEX/
-├── .env.example
-├── .gitignore
-├── firebase.json
-├── firestore.indexes.json
-├── firestore.rules
-├── index.html
-├── package.json
-├── postcss.config.js
-├── README.md
-├── storage.rules
-├── tailwind.config.js
-├── vercel.json
-├── vite.config.js
-└── src/
-    ├── App.jsx
-    ├── index.css
-    ├── main.jsx
-    ├── components/
-    │   ├── ClientCard.jsx
-    │   ├── ConfirmDialog.jsx
-    │   ├── EditClientModal.jsx
-    │   ├── Loading.jsx
-    │   ├── MediaGallery.jsx
-    │   ├── Navbar.jsx
-    │   ├── ProtectedRoute.jsx
-    │   ├── ReviewCard.jsx
-    │   └── StarRating.jsx
-    ├── context/
-    │   ├── AuthContext.jsx
-    │   └── ToastContext.jsx
-    ├── hooks/
-    │   ├── useAuth.js
-    │   └── useClients.js
-    ├── pages/
-    │   ├── AddClient.jsx
-    │   ├── AddReview.jsx
-    │   ├── ClientProfile.jsx
-    │   ├── Dashboard.jsx
-    │   └── Login.jsx
-    ├── services/
-    │   ├── authService.js
-    │   ├── clientService.js
-    │   ├── firebase.js
-    │   ├── reviewService.js
-    │   └── storageService.js
-    └── utils/
-        ├── avatars.js
-        ├── ratingUtils.js
-        └── validation.js
-```
-
----
-
-## 🔒 Security & Privacy Notice
-
-- This application is strictly for personal/authorized administrator usage.
-- Never commit live API secrets or real `.env` files to public git repositories.
-- All media files are stored within scoped `private/users/{uid}/...` paths enforced by Firebase Storage security rules.
+4. Click **Deploy**.
+5. The included `vercel.json` rewrite ensures that nested routes like `/client/:id` and `/client/:id/review` reload seamlessly without 404 errors.

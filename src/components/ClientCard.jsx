@@ -26,25 +26,10 @@ export default function ClientCard({ client }) {
       className="group relative bg-[#17171F] hover:bg-[#20202A]/80 border border-[#2A2A35] hover:border-purple-500/40 rounded-2xl p-4 transition-all duration-200 cursor-pointer shadow-lg hover:shadow-purple-500/10 active:scale-[0.99]"
     >
       <div className="flex items-center gap-3.5">
-        {/* Profile Avatar / Photo */}
+        {/* Profile Avatar */}
         <div className="relative shrink-0">
-          {client.profileImageUrl ? (
-            <img
-              src={client.profileImageUrl}
-              alt={client.name}
-              className="w-16 h-16 rounded-full object-cover border-2 border-purple-500/30 group-hover:border-purple-400 transition-colors shadow-md"
-              onError={(e) => {
-                // Fallback to avatar if image fails to load
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'flex';
-              }}
-            />
-          ) : null}
-
           <div
-            className={`w-16 h-16 rounded-full bg-gradient-to-tr ${avatarInfo.gradient} flex items-center justify-center text-2xl shadow-inner border-2 border-purple-500/30 group-hover:border-purple-400 transition-all ${
-              client.profileImageUrl ? 'hidden' : 'flex'
-            }`}
+            className={`w-14 h-14 rounded-2xl bg-gradient-to-tr ${avatarInfo.gradient} flex items-center justify-center text-2xl shadow-inner border border-white/10 group-hover:scale-105 transition-all`}
           >
             <span>{avatarInfo.emoji}</span>
           </div>
@@ -89,7 +74,9 @@ export default function ClientCard({ client }) {
       {/* Smashed Again Action Button */}
       <div className="mt-3.5 pt-3 border-t border-[#2A2A35]/60 flex items-center justify-between">
         <span className="text-[11px] font-medium text-[#92929E]">
-          {totalReviews === 0 ? 'No sessions logged yet' : `Last active ${client.updatedAt ? new Date(client.updatedAt).toLocaleDateString() : 'recently'}`}
+          {totalReviews === 0
+            ? 'No sessions logged yet'
+            : `Last active ${client.updatedAt ? new Date(client.updatedAt).toLocaleDateString() : 'recently'}`}
         </span>
 
         <button
