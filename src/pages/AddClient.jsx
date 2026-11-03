@@ -124,7 +124,7 @@ export default function AddClient() {
           </button>
           <div>
             <h1 className="text-xl font-black text-white">Add New Dih</h1>
-            <p className="text-xs text-[#92929E]">Register a profile mf</p>
+            <p className="text-xs text-[#92929E]">Register a new mf</p>
           </div>
         </div>
 
@@ -152,7 +152,7 @@ export default function AddClient() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Vanessa Monroe"
+                placeholder="e.g. jhonny sins"
                 className="w-full bg-[#0B0B0F] border border-[#2A2A35] focus:border-purple-500 focus:ring-1 focus:ring-purple-500 rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 outline-none"
               />
               {errors.name && <p className="text-rose-400 text-xs mt-1">{errors.name}</p>}
@@ -184,7 +184,7 @@ export default function AddClient() {
                   type="text"
                   value={place}
                   onChange={(e) => setPlace(e.target.value)}
-                  placeholder="e.g. Downtown Penthouse"
+                  placeholder="e.g. Varkala"
                   className="w-full bg-[#0B0B0F] border border-[#2A2A35] focus:border-purple-500 focus:ring-1 focus:ring-purple-500 rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 outline-none"
                 />
               </div>

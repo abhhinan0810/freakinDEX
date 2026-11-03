@@ -45,7 +45,7 @@ export default function Navbar() {
               freakinDEX
             </span>
             <span className="text-[10px] uppercase font-bold tracking-widest text-[#92929E] -mt-1">
-              VIP Directory
+              All of em together
             </span>
           </div>
         </Link>
@@ -78,11 +78,11 @@ export default function Navbar() {
                     </span>
                     {isFirebaseConfigured ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        Firebase Live
+                      
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                        Local Demo
+                      
                       </span>
                     )}
                   </div>
